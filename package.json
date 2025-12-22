@@ -1,0 +1,22 @@
+{
+  "name": "asterisk-callcontrol",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ari-client": "^2.2.0",
+    "asterisk-ami-client": "^1.1.5",
+    "asterisk-manager": "^0.2.0",
+    "axios": "^1.13.2",
+    "body-parser": "^2.2.0",
+    "express": "^5.1.0",
+    "log4js": "^6.9.1",
+    "mysql2": "^3.15.3",
+    "pg": "^8.16.3"
+  },
+  "description": ""
+}

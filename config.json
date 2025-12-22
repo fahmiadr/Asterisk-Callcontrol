@@ -1,0 +1,48 @@
+{
+    "Log" : {
+        "Filename": "Log//AMI.log",
+        "Level": "debug",
+        "MaxLogSize": "1000K",
+        "MaxLogNumber": 1000
+    },
+    "DB": {
+        "host2": "192.168.137.104",
+        "host": "10.14.151.123",
+        "port":"5432",
+        "user": "root_mendawai",
+        "password": "Sa212",
+        "name": "db_pbx"
+    },
+    "DB2": {
+        "host": "127.0.0.1",
+        "port":"15432",
+        "user": "root_mendawai",
+        "password": "Sa212",
+        "name": "db_pbx"
+    },
+    "AMI": {
+        "port": "5038",
+        "host": "10.14.151.121",
+        "host2": "192.168.1.8",
+        "username": "admin",
+        "password2": "P@ssw0rd",
+        "password": "icon@2025!",
+        "reconnectDelay": "500000"
+    },
+    "API":{
+        "timeout":"10000"
+    },
+    "ARI":{
+        "URL": "http://192.168.137.2:8088",
+        "Username": "asterisk",
+        "Password": "P@ssw0rd"
+    },
+    "AXIOS":{
+        "URL1": "http://192.168.254.224/api/api/call/incoming/webhook",        
+        "URL2": "http://192.168.18.81/api/api/call/incoming/webhook",
+        "URL": "http://10.14.151.123/api/api/call/incoming/webhook"
+    },
+    "WebSocket":{
+        "Port":"9001"
+    }
+}
