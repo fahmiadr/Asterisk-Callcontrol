@@ -3,6 +3,7 @@ const router = express.Router();
 const asterisk = require("./AsteriskCC");
 const asteriskAri = require("./AsteriskAri");
 const logger = require("./Module/logger");
+const ws = require("./websocket");
 
 // === API QUEUE SUMMARY ===
 router.post("/queueSummary", async (req, res) => {
@@ -45,10 +46,67 @@ router.post("/dashboard", async (req, res) => {
 // === API HOLD ===
 router.post("/hold", async (req, res) => {
     const { extension, hold } = req.body;
-    logger(`REQUEST.HOLD.EXTENSION=${extension},HOLD=${hold}`);
+    logger(`REQUEST.HOLD.EXTENSION=${extension},Msg=${hold}`);
     try {
         //const data = await asterisk.AgentHold(extension, hold);
-        const data = await asteriskAri.holdChannel(extension);
+        //const data = await asteriskAri.holdChannel(extension);
+        const data = await ws.sendTo(extension,"Hold;");
+        res.json({ success: true, data });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// === API Answer ===
+router.post("/answer", async (req, res) => {
+    const { extension, hold } = req.body;
+    logger(`REQUEST.ANSWER.EXTENSION=${extension},Msg=${hold}`);
+    try {
+        //const data = await asterisk.AgentHold(extension, hold);
+        //const data = await asteriskAri.holdChannel(extension);
+        const data = await ws.sendTo(extension,"Answer;");
+        res.json({ success: true, data });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// === API Hangup ===
+router.post("/hangup", async (req, res) => {
+    const { extension, hold } = req.body;
+    logger(`REQUEST.HANGUP.EXTENSION=${extension},Msg=${hold}`);
+    try {
+        //const data = await asterisk.AgentHold(extension, hold);
+        //const data = await asteriskAri.holdChannel(extension);
+        const data = await ws.sendTo(extension,"Hangup;");
+        res.json({ success: true, data });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// === API Transfer ===
+router.post("/transfer", async (req, res) => {
+    const { extension, msg } = req.body;
+    logger(`REQUEST.TRANSFER.EXTENSION=${extension},Msg=${msg}`);
+    try {
+        //const data = await asterisk.AgentHold(extension, hold);
+        //const data = await asteriskAri.holdChannel(extension);
+        const data = await ws.sendTo(extension,msg);
+        res.json({ success: true, data });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// === API Conference ===
+router.post("/conference", async (req, res) => {
+    const { extension, msg } = req.body;
+    logger(`REQUEST.TRANSFER.EXTENSION=${extension},Msg=${msg}`);
+    try {
+        //const data = await asterisk.AgentHold(extension, hold);
+        //const data = await asteriskAri.holdChannel(extension);
+        const data = await ws.sendTo(extension,msg);
         res.json({ success: true, data });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
@@ -57,11 +115,11 @@ router.post("/hold", async (req, res) => {
 
 // === API DIAL ===
 router.post("/dial", async (req, res) => {
-    const { extension, dial } = req.body;
-    logger(`REQUEST.DIAL.EXTENSION=${extension},DIAL=${dial}`);
+    const { extension, msg } = req.body;
+    logger(`REQUEST.DIAL.EXTENSION=${extension},Msg=${msg}`);
     try {
-        
-        const data = await asterisk.AgentDial(extension, dial);
+        const data = await ws.sendTo(extension,msg);
+        //const data = await asterisk.AgentDial(extension, dial);
         res.json({ success: true, data });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });

@@ -13,7 +13,7 @@ app.use(express.json());
 
 asterisk.connectAMI();
 
-//ws.startWebSocketServer();
+ws.startWebSocketServer();
 
 app.use("/",agentRoutes);
 

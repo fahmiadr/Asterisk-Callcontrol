@@ -71,16 +71,15 @@ function sendTo(ext, message) {
     const ws = clients.get(ext);
 
     if (!ws) {
-        logger(`WS ext ${ext} not found`);
+        logger(`Ext=${ext}.NotFound`);
         return false;
     }
 
     if (ws.readyState === WebSocket.OPEN) {
         ws.send(message);
-        logger(`WS TX to ${ext}: ${message}`);
+        logger(`EXT=${ext}, Msg=${message}`);
         return true;
     }
-
     return false;
 }
 

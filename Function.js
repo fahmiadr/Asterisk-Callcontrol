@@ -80,6 +80,28 @@ function postStatus(status, event){
     postThis(); // load
 }
 
+function postStatusPause(status, event){
+    myExtension = null;
+    myExtension = event.MemberName;//getExtension(event.Channel);
+
+    myCallerId = '';
+    if(status==='Connected'){
+        myCallerId = event.ConnectedLineNum;
+    }
+
+    logger(`AXIOS.POST:Ext=${myExtension},State=${status},CallerId=${myCallerId}`)
+
+    const postThis = async () => {
+        const result = await actionPost(config.AXIOS.URL, {
+            extension: myExtension,
+            state: status,
+            caller: myCallerId,
+            interaction_id: ''
+        });
+    };
+
+    postThis(); // load
+}
 
 module.exports={
     actionPost,
