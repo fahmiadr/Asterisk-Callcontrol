@@ -40,7 +40,7 @@
     "AXIOS":{
         "URL1": "http://192.168.254.224/api/api/call/incoming/webhook",        
         "URL2": "http://192.168.18.81/api/api/call/incoming/webhook",
-        "URL": "http://10.14.151.123/api/api/call/incoming/webhook"
+        "URL": "https://10.14.151.123/api/api/call/incoming/webhook"
     },
     "WebSocket":{
         "Port":"9001"

@@ -2,6 +2,7 @@ const axios = require('axios');
 const logger = require('./Module/logger');
 const { json } = require('body-parser');
 const config = require('./config.json');
+const https = require('https');
 
 let myExtension = null;
 let myCallerId = null;
@@ -10,6 +11,10 @@ async function actionPost(url, body) {
     try {        
         logger(`[Axios.POST]:URL=${url},BODY=${JSON.stringify(body)}`);
 
+        const httpsAgent = new https.Agent({
+            rejectUnauthorized: false   // setara curl --insecure
+        });
+
         const thisResp =  {
             method: 'post',
             maxBodyLength: Infinity,
@@ -17,7 +22,8 @@ async function actionPost(url, body) {
             headers: { 
                 'Content-Type': 'application/json'
             },
-            data : body
+            data : body,
+            httpsAgent
         };
 
         axios.request(thisResp)
