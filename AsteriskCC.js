@@ -132,6 +132,7 @@ function connectAMI() {
         // Listen events
         ami.on('event', (event) => {
             logger(`Event=${event.Event}`);
+            logger(`📥 AMI EVENT: ${JSON.stringify(event, null, 2)}`);
 
             saveAgentEvent(event);
             saveChannel(event);
@@ -261,7 +262,7 @@ function AgentHold(extension,hold) {
 }
 
 // FUNCTION REQUEST PAUSE
-function AgentPause(extension,queue,state) {
+function AgentPause(extension,queue,state,reason) {
     return new Promise((resolve, reject) => {
         let result = null;
 
@@ -269,7 +270,7 @@ function AgentPause(extension,queue,state) {
         if(!agentsData[extension].interface) myInterface=`*45/${extension}@from-queue/n`;
         else myInterface=agentsData[extension].interface;
 
-        logger(`REQUEST.AGENT.PAUSE.EXT=${extension},QUEUE=${queue},STATE=${state},Interface=${myInterface}`);
+        logger(`REQUEST.AGENT.PAUSE.EXT=${extension},QUEUE=${queue},STATE=${state},Interface=${myInterface},Reason=${reason}`);
 
         if(state==='1'){
             logger(`REQUEST.AGENT.PAUSED=TRUE`);
@@ -277,7 +278,8 @@ function AgentPause(extension,queue,state) {
             Action: 'QueuePause',
             Interface: myInterface,
             Queue: queue,            // queue name
-            Paused: 'true'            // pause
+            Paused: 'true',            // pause
+            Reason: reason
             }, (err, res) => {
                 if (err) {
                     logger(`ERROR=${err}`);
@@ -292,7 +294,8 @@ function AgentPause(extension,queue,state) {
             Action: 'QueuePause',
             Interface: myInterface,
             Queue: queue,            // queue name
-            Paused: 'false'           // pause
+            Paused: 'false',           // pause
+            Reason: reason
             }, (err, res) => {
                 if (err) {
                     logger(`ERROR=${err}`);

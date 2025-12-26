@@ -128,10 +128,10 @@ router.post("/dial", async (req, res) => {
 
 // === API PAUSE ===
 router.post("/pause", async (req, res) => {
-    const { extension, queue, state } = req.body;
-    logger(`REQUEST.PAUSE.EXTENSION=${extension},QUEUE=${queue},STATE=${state}`);
+    const { extension, queue, state, reason } = req.body;
+    logger(`REQUEST.PAUSE.EXTENSION=${extension},QUEUE=${queue},STATE=${state},REASON=${reason}`);
     try {
-        const data = await asterisk.AgentPause(extension, queue, state);
+        const data = await asterisk.AgentPause(extension, queue, state, reason);
         res.json({ success: true, queue, data });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
