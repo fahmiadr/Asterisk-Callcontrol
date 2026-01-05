@@ -369,6 +369,62 @@ function AgentLogout(extension,queue) {
     });
 }
 
+// FUNCTION GET EXTENSION BY IP
+function GetExtensionByIp(ip) {
+    return new Promise((resolve, reject) => {
+        logger(`REQUEST.GET.EXTENSION.BY.IP=${ip}`);
+
+        let foundExtension = null;
+
+        // Handler reference (penting untuk cleanup)
+        const onEndpoint = (event) => {
+            logger(
+                `[AMI.ON][pjsipshowendpoint] ObjectName=${event.ObjectName}, Contacts=${event.Contacts}`
+            );
+
+            if (!event.Contacts) return;
+
+            if (event.Contacts.includes(ip)) {
+                foundExtension = event.ObjectName;
+                logger(
+                    `MATCH.IP=${ip} -> EXTENSION=${foundExtension}`
+                );
+            }
+        };
+
+        const onComplete = () => {
+            logger('[AMI.ONCE][pjsipshowendpointscomplete]');
+
+            // CLEANUP listener
+            ami.removeListener('EndpointList', onEndpoint);
+
+            if (!foundExtension) {
+                const msg = `Extension not found for IP ${ip}`;
+                logger(msg);
+                return resolve({ success: false, message: msg });
+            }
+
+            logger(`FOUND.EXTENSION=${foundExtension} FOR IP=${ip}`);
+            resolve({
+                success: true,
+                ip,
+                extension: foundExtension
+            });
+        };
+
+        ami.action({ Action: "PJSIPShowEndpoints" }, (err) => {
+            if (err) {
+                logger(`ERROR=${err}`);
+                ami.removeListener('PJSIPShowEndpoints', onEndpoint);
+                return reject(err);
+            }
+        });
+
+        ami.on('EndpointList', onEndpoint);
+        ami.once('EndpointListComplete', onComplete);
+    });
+}
+
 // FUNCTION REQUEST QUEUE SUMMARY
 function queueSummary(queue) {
     return new Promise((resolve, reject) => {
@@ -532,5 +588,6 @@ module.exports={
     AgentPause,
     AgentHold,
     AgentDial,
-    agentsData
+    agentsData,
+    GetExtensionByIp
 }

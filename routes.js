@@ -137,6 +137,38 @@ router.post("/pause", async (req, res) => {
         res.status(500).json({ success: false, error: err.message });
     }
 });
+router.post("/pauseMultiSkill", async (req, res) => {
+    const { extension, queues, state, reason } = req.body;
+
+    if (!Array.isArray(queues) || !queues.length) {
+        return res.status(400).json({
+            success: false,
+            message: "queues must be array"
+        });
+    }
+
+    logger(
+        `REQUEST.PAUSE.EXT=${extension},QUEUES=${queues.join(',')},STATE=${state},REASON=${reason}`
+    );
+
+    const results = [];
+
+    for (const queue of queues) {
+        try {
+            const data = await asterisk.AgentPause(extension, queue, state, reason);
+            results.push({ queue, success: true, data });
+        } catch (err) {
+            results.push({ queue, success: false, error: err.message });
+        }
+    }
+
+    res.json({
+        success: true,
+        extension,
+        state,
+        results
+    });
+});
 
 // === API LOGIN ===
 router.post("/login", async (req, res) => {
@@ -148,6 +180,35 @@ router.post("/login", async (req, res) => {
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
+});
+router.post("/loginMultiSkill", async (req, res) => {
+    const { extension, queues } = req.body;
+
+    if (!Array.isArray(queues) || !queues.length) {
+        return res.status(400).json({
+            success: false,
+            message: "queues must be array"
+        });
+    }
+
+    logger(`REQUEST.LOGIN.EXT=${extension},QUEUES=${queues.join(',')}`);
+
+    const results = [];
+
+    for (const queue of queues) {
+        try {
+            const data = await asterisk.AgentLogin(extension, queue);
+            results.push({ queue, success: true, data });
+        } catch (err) {
+            results.push({ queue, success: false, error: err.message });
+        }
+    }
+
+    res.json({
+        success: true,
+        extension,
+        results
+    });
 });
 
 // === API LOGOUT ===
@@ -161,7 +222,50 @@ router.post("/logout", async (req, res) => {
         res.status(500).json({ success: false, error: err.message });
     }
 });
+router.post("/logoutMultiSkill", async (req, res) => {
+    const { extension, queues } = req.body;
 
+    if (!Array.isArray(queues) || !queues.length) {
+        return res.status(400).json({
+            success: false,
+            message: "queues must be array"
+        });
+    }
+
+    logger(`REQUEST.LOGOUT.EXT=${extension},QUEUES=${queues.join(',')}`);
+
+    const results = [];
+
+    for (const queue of queues) {
+        try {
+            const data = await asterisk.AgentLogout(extension, queue);
+            results.push({ queue, success: true, data });
+        } catch (err) {
+            results.push({ queue, success: false, error: err.message });
+        }
+    }
+
+    res.json({
+        success: true,
+        extension,
+        results
+    });
+});
+
+
+// === Get Extension by IP ===
+router.post("/getExtension", async (req, res) => {
+    const { ip } = req.body;
+
+    logger(`REQUEST.GET.EXTENSION.BY.IP=${ip}`);
+
+    try {
+        const data = await asterisk.GetExtensionByIp(ip);
+        res.json(data);
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
 // === Web Socket ===
 
 
