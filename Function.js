@@ -68,8 +68,8 @@ function postStatus(status, event){
     myExtension = getExtension(event.Channel);
 
     let queue = '';
-
     myCallerId = '';
+    
     if(status==='Connected'){
         myCallerId = event.ConnectedLineNum;
     }
