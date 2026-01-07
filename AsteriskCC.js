@@ -154,7 +154,7 @@ function connectAMI() {
                     break;
                 case 'hangup':
                     //hangup
-                    //myFunc.postStatus('Hangup',event);
+                    myFunc.postStatus('Hangup',event);
                     logger(`📥 AMI EVENT: ${JSON.stringify(event, null, 2)}`);
                     break;
                 case 'queuememberpause':
