@@ -172,6 +172,7 @@ function connectAMI() {
                     break;
                 case 'agentcomplete':
                     logger(`📥 AMI EVENT: ${JSON.stringify(event, null, 2)}`);
+                    myFunc.postStatus('AgentComplete',event);
                     break;
                 case 'queuesummary':
                     logger(`📊 Queue Summary Event.`);
@@ -579,6 +580,63 @@ function scheduleReconnect() {
   */
 }
 
+// Fungsi untuk mendapatkan Angka ACW
+function GetAcwValue(extension, queue) {
+    return new Promise((resolve, reject) => {
+        logger(`REQUEST.GET.ACW.EXT=${extension},QUEUE=${queue}`);
+
+        let wrapupTime = null;
+        let lastCall = null;
+
+        const onMember = (event) => {
+            //if (event.Name !== extension) return;
+            //if (event.Queue !== queue) return;
+
+            logger(
+                `[AMI.ON][QueueMember] EXT=${event.Name}, WRAPUP=${event.Wrapuptime}, LASTCALL=${event.LastCall}`
+            );
+
+            wrapupTime = Number(event.Wrapuptime || 0);
+            lastCall = Number(event.LastCall || 0);
+        };
+
+        const onComplete = () => {
+            logger('[AMI.ONCE][QueueStatusComplete]');
+            ami.removeListener('QueueMember', onMember);
+
+            if (wrapupTime === null) {
+                return resolve({
+                    success: false,
+                    message: 'Agent not found in queue'
+                });
+            }
+
+            resolve({
+                success: true,
+                extension,
+                queue,
+                acw: wrapupTime,       // ← INI ANGKA ACW DARI ASTERISK
+                lastCall,
+                unit: 'seconds'
+            });
+        };
+
+        ami.action(
+            { Action: 'QueueStatus', Queue: queue },
+            (err) => {
+                if (err) {
+                    logger(`ERROR=${err}`);
+                    ami.removeListener('QueueMember', onMember);
+                    return reject(err);
+                }
+            }
+        );
+
+        ami.on('QueueMember', onMember);
+        ami.once('QueueStatusComplete', onComplete);
+    });
+}
+
 module.exports={
     connectAMI,
     queueSummary,
@@ -589,5 +647,6 @@ module.exports={
     AgentHold,
     AgentDial,
     agentsData,
-    GetExtensionByIp
+    GetExtensionByIp,
+    GetAcwValue
 }

@@ -67,9 +67,15 @@ function postStatus(status, event){
     myExtension = null;
     myExtension = getExtension(event.Channel);
 
+    let queue = '';
+
     myCallerId = '';
     if(status==='Connected'){
         myCallerId = event.ConnectedLineNum;
+    }
+    else if(status==='AgentComplete'){
+        queue = event.Queue;
+        myExtension = event.MemberName;
     }
 
     logger(`AXIOS.POST:Ext=${myExtension},State=${status},CallerId=${myCallerId}`)
@@ -79,7 +85,8 @@ function postStatus(status, event){
             extension: myExtension,
             state: status,
             caller: myCallerId,
-            interaction_id: ''
+            interaction_id: '',
+            queue:queue
         });
     };
 

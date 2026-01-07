@@ -266,6 +266,21 @@ router.post("/getExtension", async (req, res) => {
         res.status(500).json({ success: false, error: err.message });
     }
 });
+
+// === Get ACW Value ===
+router.post("/getAcw", async (req, res) => {
+    const { extension, queue } = req.body;
+
+    logger(`REQUEST.GET.ACW.EXT=${extension},QUEUE=${queue}`);
+
+    try {
+        const data = await asterisk.GetAcwValue(extension, queue);
+        res.json(data);
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 // === Web Socket ===
 
 
