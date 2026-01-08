@@ -158,7 +158,7 @@ function connectAMI() {
                     logger(`📥 AMI EVENT: ${JSON.stringify(event, null, 2)}`);
                     break;
                 case 'queuememberpause':
-                    //myFunc.postStatus('Pause',event);
+                    myFunc.postStatus('Pause',event);
                     logger(`📥 AMI EVENT: ${JSON.stringify(event, null, 2)}`);
                     break;
                 case 'queuecallerabandon':
