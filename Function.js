@@ -79,7 +79,7 @@ function postStatus(status, event){
     }
     else if(status==='Pause'){
         myExtension = event.MemberName;
-        state = 'AutoPause';
+        status = 'AutoPause';
         queue = event.Queue;
     }
 
