@@ -132,7 +132,7 @@ function connectAMI() {
         // Listen events
         ami.on('event', (event) => {
             logger(`Event=${event.Event}`);
-            logger(`📥 AMI EVENT: ${JSON.stringify(event, null, 2)}`);
+            //logger(`📥 AMI EVENT: ${JSON.stringify(event, null, 2)}`);
 
             saveAgentEvent(event);
             saveChannel(event);
@@ -158,7 +158,7 @@ function connectAMI() {
                     logger(`📥 AMI EVENT: ${JSON.stringify(event, null, 2)}`);
                     break;
                 case 'queuememberpause':
-                    if(event.PausedReason==='RONA'){
+                    if(['RONA', 'Auto-Pause'].includes(event.PausedReason)){
                         myFunc.postStatus('Pause',event);
                     }
                     logger(`📥 AMI EVENT: ${JSON.stringify(event, null, 2)}`);
