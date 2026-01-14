@@ -81,6 +81,7 @@ function postStatus(status, event){
         myExtension = event.MemberName;
         status = 'AutoPause';
         queue = event.Queue;
+        
     }
 
     logger(`AXIOS.POST:Ext=${myExtension},State=${status},CallerId=${myCallerId}`)
