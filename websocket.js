@@ -75,7 +75,7 @@ function handleWsMessage(ws, msg) {
             return;
         }
 
-        const status = cmd;//statusRaw;// === "ONLINE" ? "Connected" : "Disconnected";
+        const status = statusRaw;// === "ONLINE" ? "Connected" : "Disconnected";
 
         const event = {
             Channel: ext,           //`SIP/${ext}`,
