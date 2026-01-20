@@ -281,6 +281,17 @@ router.post("/getAcw", async (req, res) => {
     }
 });
 
+// === Get All PJSIP Endpoints ===
+router.post("/endpoints", async (req, res) => {
+    logger(`REQUEST.GET.ALL.ENDPOINTS`);
+    try {
+        const data = await asterisk.GetAllEndpoints();
+        res.json(data);
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 // === Web Socket ===
 
 

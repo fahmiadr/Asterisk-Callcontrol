@@ -639,6 +639,56 @@ function GetAcwValue(extension, queue) {
     });
 }
 
+// FUNCTION GET ALL PJSIP ENDPOINTS + STATUS
+function GetAllEndpoints() {
+    return new Promise((resolve, reject) => {
+        logger(`REQUEST.GET.ALL.ENDPOINTS`);
+
+        const endpoints = [];
+
+        const onEndpoint = (event) => {
+            if (event.Event !== 'EndpointList') return;
+
+            const data = {
+                objectName: event.ObjectName,          // extension / endpoint
+                transport: event.Transport,
+                aors: event.AORs,
+                auths: event.Auths,
+                deviceState: event.DeviceState,
+                state: event.State,
+                activeChannels: event.ActiveChannels,
+                contacts: event.Contacts,
+                inUse: event.InUse,
+                online: event.DeviceState === 'Available' || event.State === 'online'
+            };
+
+            endpoints.push(data);
+        };
+
+        const onComplete = () => {
+            logger('[AMI.ONCE][EndpointListComplete]');
+            ami.removeListener('EndpointList', onEndpoint);
+
+            resolve({
+                success: true,
+                count: endpoints.length,
+                endpoints
+            });
+        };
+
+        ami.action({ Action: 'PJSIPShowEndpoints' }, (err) => {
+            if (err) {
+                logger(`ERROR=${err}`);
+                ami.removeListener('EndpointList', onEndpoint);
+                return reject(err);
+            }
+        });
+
+        ami.on('EndpointList', onEndpoint);
+        ami.once('EndpointListComplete', onComplete);
+    });
+}
+
 module.exports={
     connectAMI,
     queueSummary,
@@ -650,5 +700,6 @@ module.exports={
     AgentDial,
     agentsData,
     GetExtensionByIp,
-    GetAcwValue
+    GetAcwValue,
+    GetAllEndpoints
 }
