@@ -1,6 +1,7 @@
 const WebSocket = require("ws");
 const logger = require('./Module/logger');
 const config = require('./config.json');
+const myFunc = require('./Function');
 
 const port=config.WebSocket.Port;
 
@@ -60,6 +61,34 @@ function handleWsMessage(ws, msg) {
 
         logger(`WS registered: ext=${ext}`);
         ws.send("REGISTERED;OK");
+        return;
+    }
+
+    // SIP_STATUS;ONLINE;1002;10.14.151.121
+    if (cmd === "SIP_STATUS") {
+        const statusRaw = (parts[1] || "").toUpperCase(); // ONLINE / OFFLINE
+        const ext = parts[2];
+        const ip = parts[3];
+
+        if (!ext || !statusRaw) {
+            ws.send("ERROR;INVALID_SIP_STATUS_FORMAT");
+            return;
+        }
+
+        const status = cmd;//statusRaw;// === "ONLINE" ? "Connected" : "Disconnected";
+
+        const event = {
+            Channel: ext,           //`SIP/${ext}`,
+            ClientIP: ip || "",
+            Status:status
+        };
+
+        logger(`SIP_STATUS from ${ext}: ${status} (${ip})`);
+
+        // kirim ke webhook CRM
+        myFunc.postStatus(status, event);
+
+        ws.send("SIP_STATUS;OK");
         return;
     }
 

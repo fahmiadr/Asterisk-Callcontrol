@@ -69,6 +69,9 @@ function postStatus(status, event){
 
     let queue = '';
     myCallerId = '';
+
+    let ip = '';
+    let sip_status = '';
     
     if(status==='Connected'){
         myCallerId = event.ConnectedLineNum;
@@ -81,7 +84,11 @@ function postStatus(status, event){
         myExtension = event.MemberName;
         status = 'AutoPause';
         queue = event.Queue;
-        
+    }
+    else if(status==='SIP_STATUS'){
+        myExtension = event.Channel;
+        sip_status = event.Status;
+        ip = event.ClientIP;
     }
 
     logger(`AXIOS.POST:Ext=${myExtension},State=${status},CallerId=${myCallerId}`)
@@ -92,6 +99,8 @@ function postStatus(status, event){
             state: status,
             caller: myCallerId,
             interaction_id: '',
+            ip:ip,
+            sip_status:sipStatus,
             queue:queue
         });
     };
