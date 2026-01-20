@@ -29,6 +29,20 @@ function startWebSocketServer() {
             if (ws.ext) {
                 clients.delete(ws.ext);
                 logger(`WS disconnected: ext=${ws.ext}`);
+
+                const cmd = "SIP_STATUS";
+                const status = "OFFLINE";
+
+                const event = {
+                    Channel: ws.ext,           //`SIP/${ext}`,
+                    ClientIP: "",
+                    Status:status
+                };
+
+                logger(`SIP_STATUS from ${ws.ext}: ${status}`);
+
+                // kirim ke webhook CRM
+                myFunc.postStatus(cmd, event);
             }
         });
     });
