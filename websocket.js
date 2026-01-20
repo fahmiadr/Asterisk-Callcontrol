@@ -86,7 +86,7 @@ function handleWsMessage(ws, msg) {
         logger(`SIP_STATUS from ${ext}: ${status} (${ip})`);
 
         // kirim ke webhook CRM
-        myFunc.postStatus(status, event);
+        myFunc.postStatus(cmd, event);
 
         ws.send("SIP_STATUS;OK");
         return;
