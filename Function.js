@@ -100,7 +100,7 @@ function postStatus(status, event){
             caller: myCallerId,
             interaction_id: '',
             ip:ip,
-            sip_status:sipStatus,
+            sip_status:sip_status,
             queue:queue
         });
     };
