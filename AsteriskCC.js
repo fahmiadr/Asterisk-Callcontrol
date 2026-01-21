@@ -379,6 +379,70 @@ function GetExtensionByIp(ip) {
 
         let foundExtension = null;
 
+        const onEndpoint = (event) => {
+            logger(
+                `[AMI.ON][EndpointList] ObjectName=${event.ObjectName}, Contacts=${event.Contacts}`
+            );
+
+            if (!event.Contacts) return;
+
+            // Contoh Contacts:
+            // sip:1005@10.14.92.1:5060;transport=udp
+
+            const contacts = event.Contacts.split(',');
+
+            for (const contact of contacts) {
+                // Extract IP dari URI
+                const match = contact.match(/@([\d.]+)(?::\d+)?/);
+                if (!match) continue;
+
+                const contactIp = match[1];
+
+                if (contactIp === ip) {
+                    foundExtension = event.ObjectName;
+                    logger(`MATCH.IP=${ip} -> EXTENSION=${foundExtension}`);
+                    break;
+                }
+            }
+        };
+
+        const onComplete = () => {
+            logger('[AMI.ONCE][EndpointListComplete]');
+
+            ami.removeListener('EndpointList', onEndpoint);
+
+            if (!foundExtension) {
+                const msg = `Extension not found for IP ${ip}`;
+                logger(msg);
+                return resolve({ success: false, message: msg });
+            }
+
+            logger(`FOUND.EXTENSION=${foundExtension} FOR IP=${ip}`);
+            resolve({
+                success: true,
+                ip,
+                extension: foundExtension
+            });
+        };
+
+        ami.action({ Action: "PJSIPShowEndpoints" }, (err) => {
+            if (err) {
+                logger(`ERROR=${err}`);
+                ami.removeListener('EndpointList', onEndpoint);
+                return reject(err);
+            }
+        });
+
+        ami.on('EndpointList', onEndpoint);
+        ami.once('EndpointListComplete', onComplete);
+    });
+}
+/*function GetExtensionByIp(ip) {
+    return new Promise((resolve, reject) => {
+        logger(`REQUEST.GET.EXTENSION.BY.IP=${ip}`);
+
+        let foundExtension = null;
+
         // Handler reference (penting untuk cleanup)
         const onEndpoint = (event) => {
             logger(
@@ -426,7 +490,7 @@ function GetExtensionByIp(ip) {
         ami.on('EndpointList', onEndpoint);
         ami.once('EndpointListComplete', onComplete);
     });
-}
+}*/
 
 // FUNCTION REQUEST QUEUE SUMMARY
 function queueSummary(queue) {
