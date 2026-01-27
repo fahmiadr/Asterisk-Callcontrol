@@ -72,9 +72,12 @@ function postStatus(status, event){
 
     let ip = '';
     let sip_status = '';
+
+    let interactionId = '';
     
     if(status==='Connected'){
         myCallerId = event.ConnectedLineNum;
+        interactionId = event.Linkedid;
     }
     else if(status==='AgentComplete'){
         queue = event.Queue;
@@ -98,7 +101,7 @@ function postStatus(status, event){
             extension: myExtension,
             state: status,
             caller: myCallerId,
-            interaction_id: '',
+            interaction_id: interactionId,
             ip:ip,
             sip_status:sip_status,
             queue:queue

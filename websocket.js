@@ -66,15 +66,31 @@ function handleWsMessage(ws, msg) {
         }
 
         // jika ext sudah ada, kick koneksi lama
-        if (clients.has(ext)) {
+        /*if (clients.has(ext)) {
             clients.get(ext).close();
+        }*/
+       
+         // kick semua koneksi lama untuk ext ini
+        while (clients.has(ext)) {
+            const oldWs = clients.get(ext);
+            try {
+                oldWs.close();
+            } catch (e) {
+                logger(`WARN: Failed closing old WS for ext=${ext}: ${e}`);
+            }
+            clients.delete(ext);
         }
 
         ws.ext = ext;
         clients.set(ext, ws);
 
         logger(`WS registered: ext=${ext}`);
-        ws.send("REGISTERED;OK");
+        try{
+            ws.send("REGISTERED;OK");
+        }
+        catch(error){
+            logger(`ERROR:Msg=Register.Error=${error}`);
+        }
         return;
     }
 

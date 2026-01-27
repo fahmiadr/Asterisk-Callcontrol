@@ -3,7 +3,7 @@
         "Filename": "Log//AMI.log",
         "Level": "debug",
         "MaxLogSize": "1000K",
-        "MaxLogNumber": 1000
+        "MaxLogNumber": 5
     },
     "DB": {
         "host2": "192.168.137.104",
