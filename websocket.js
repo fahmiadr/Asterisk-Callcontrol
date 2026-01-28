@@ -3,7 +3,7 @@ const logger = require('./Module/logger');
 const config = require('./config.json');
 const myFunc = require('./Function');
 
-const port = config.WebSocket.Port;
+const port=config.WebSocket.Port;
 
 let wss = null;
 const clients = new Map(); // ext -> ws
@@ -15,31 +15,35 @@ function startWebSocketServer() {
 
     wss.on("connection", (ws) => {
         logger("WS connected (unregistered)");
-        ws.ext = null;
+
+        ws.ext = null; // belum register
 
         ws.on("message", (message) => {
             const msg = message.toString().trim();
             logger("WS RX:", msg);
+
             handleWsMessage(ws, msg);
         });
 
         ws.on("close", () => {
-            if (ws.ext && clients.get(ws.ext) === ws) {
+            if (ws.ext) {
                 clients.delete(ws.ext);
                 logger(`WS disconnected: ext=${ws.ext}`);
 
+                const cmd = "SIP_STATUS";
+                const status = "OFFLINE";
+
                 const event = {
-                    Channel: ws.ext,
+                    Channel: ws.ext,           //`SIP/${ext}`,
                     ClientIP: "",
-                    Status: "OFFLINE"
+                    Status:status
                 };
 
-                myFunc.postStatus("SIP_STATUS", event);
-            }
-        });
+                logger(`SIP_STATUS from ${ws.ext}: ${status}`);
 
-        ws.on("error", (err) => {
-            logger(`WS error (ext=${ws.ext || "N/A"}): ${err.message}`);
+                // kirim ke webhook CRM
+                myFunc.postStatus(cmd, event);
+            }
         });
     });
 
@@ -49,23 +53,38 @@ function startWebSocketServer() {
 
 function handleWsMessage(ws, msg) {
     const parts = msg.split(";");
-    const cmd = (parts[0] || "").toUpperCase();
 
-    // =========================
+    const cmd = parts[0].toUpperCase();
+
     // REGISTER;1003
-    // =========================
     if (cmd === "REGISTER") {
         const ext = parts[1];
 
         if (!ext) {
-            safeSend(ws, "ERROR;NO_EXTENSION");
+            ws.send("ERROR;NO_EXTENSION");
             return;
         }
 
-        // kick koneksi lama jika ada (tapi jangan self)
+        // jika ext sudah ada, kick koneksi lama
+        /*if (clients.has(ext)) {
+            clients.get(ext).close();
+        }*/
+       
+        // kick semua koneksi lama untuk ext ini
+        /*while (clients.has(ext)) {
+            const oldWs = clients.get(ext);
+            try {
+                oldWs.close();
+            } catch (e) {
+                logger(`WARN: Failed closing old WS for ext=${ext}: ${e}`);
+            }
+            clients.delete(ext);
+        }*/
+
+        // jika ext sudah ada, kick koneksi lama (tapi jangan self)
         if (clients.has(ext)) {
             const oldWs = clients.get(ext);
-            if (oldWs && oldWs !== ws) {
+            if (oldWs !== ws) {
                 try {
                     oldWs.close();
                     logger(`WS old connection closed: ext=${ext}`);
@@ -80,61 +99,45 @@ function handleWsMessage(ws, msg) {
         clients.set(ext, ws);
 
         logger(`WS registered: ext=${ext}`);
-        safeSend(ws, "REGISTERED;OK");
+        try{
+            ws.send("REGISTERED;OK");
+        }
+        catch(error){
+            logger(`ERROR:Msg=Register.Error=${error}`);
+        }
         return;
     }
 
-    // =========================
     // SIP_STATUS;ONLINE;1002;10.14.151.121
-    // =========================
     if (cmd === "SIP_STATUS") {
-        const statusRaw = (parts[1] || "").toUpperCase();
+        const statusRaw = (parts[1] || "").toUpperCase(); // ONLINE / OFFLINE
         const ext = parts[2];
-        const ip = parts[3] || "";
+        const ip = parts[3];
 
-        if (!statusRaw || !ext) {
-            safeSend(ws, "ERROR;INVALID_SIP_STATUS_FORMAT");
+        if (!ext || !statusRaw) {
+            ws.send("ERROR;INVALID_SIP_STATUS_FORMAT");
             return;
         }
 
-        // validasi: ext harus sama dengan yang register
-        if (!ws.ext || ws.ext !== ext) {
-            logger(`WARN: SIP_STATUS ext mismatch: ws.ext=${ws.ext}, msg.ext=${ext}`);
-            safeSend(ws, "ERROR;EXT_MISMATCH");
-            return;
-        }
+        const status = statusRaw;// === "ONLINE" ? "Connected" : "Disconnected";
 
         const event = {
-            Channel: ext,
-            ClientIP: ip,
-            Status: statusRaw
+            Channel: ext,           //`SIP/${ext}`,
+            ClientIP: ip || "",
+            Status:status
         };
 
-        logger(`SIP_STATUS from ${ext}: ${statusRaw} (${ip})`);
-        myFunc.postStatus("SIP_STATUS", event);
-        safeSend(ws, "SIP_STATUS;OK");
+        logger(`SIP_STATUS from ${ext}: ${status} (${ip})`);
+
+        // kirim ke webhook CRM
+        myFunc.postStatus(cmd, event);
+
+        ws.send("SIP_STATUS;OK");
         return;
     }
 
-    // =========================
-    // Unknown command
-    // =========================
-    logger(`Unhandled WS message from ${ws.ext || "unregistered"}: ${msg}`);
-    safeSend(ws, "ERROR;UNKNOWN_COMMAND");
-}
-
-// =========================
-// Helper functions
-// =========================
-
-function safeSend(ws, message) {
-    try {
-        if (ws.readyState === WebSocket.OPEN) {
-            ws.send(message);
-        }
-    } catch (e) {
-        logger(`WARN: Failed to send WS message: ${e.message}`);
-    }
+    // command lain dari client (optional)
+    logger(`Unhandled WS message from ${ws.ext}: ${msg}`);
 }
 
 function sendTo(ext, message) {
@@ -150,8 +153,6 @@ function sendTo(ext, message) {
         logger(`EXT=${ext}, Msg=${message}`);
         return true;
     }
-
-    logger(`Ext=${ext}.SocketNotOpen`);
     return false;
 }
 
@@ -165,6 +166,7 @@ function broadcast(message) {
 
 module.exports = {
     startWebSocketServer,
-    sendTo,
-    broadcast
+    sendTo
 };
+
+
