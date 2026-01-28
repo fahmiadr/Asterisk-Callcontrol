@@ -26,7 +26,8 @@
         "host2": "192.168.1.8",
         "username": "admin",
         "password2": "P@ssw0rd",
-        "password": "icon@2025!",
+        "password3": "icon@2025!",
+        "password": "DEVpbx.SYSCCA.02!",
         "reconnectDelay": "500000"
     },
     "API":{

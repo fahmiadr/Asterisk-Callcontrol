@@ -70,13 +70,27 @@ function handleWsMessage(ws, msg) {
             clients.get(ext).close();
         }*/
        
-         // kick semua koneksi lama untuk ext ini
-        while (clients.has(ext)) {
+        // kick semua koneksi lama untuk ext ini
+        /*while (clients.has(ext)) {
             const oldWs = clients.get(ext);
             try {
                 oldWs.close();
             } catch (e) {
                 logger(`WARN: Failed closing old WS for ext=${ext}: ${e}`);
+            }
+            clients.delete(ext);
+        }*/
+
+        // jika ext sudah ada, kick koneksi lama (tapi jangan self)
+        if (clients.has(ext)) {
+            const oldWs = clients.get(ext);
+            if (oldWs !== ws) {
+                try {
+                    oldWs.close();
+                    logger(`WS old connection closed: ext=${ext}`);
+                } catch (e) {
+                    logger(`WARN: Failed closing old WS for ext=${ext}: ${e}`);
+                }
             }
             clients.delete(ext);
         }
