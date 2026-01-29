@@ -88,9 +88,9 @@ function handleWsMessage(ws, msg) {
     // SIP_STATUS;ONLINE;1002;10.14.151.121
     // =========================
     if (cmd === "SIP_STATUS") {
-        const statusRaw = (parts[1] || "").toUpperCase();
-        const ext = parts[2];
-        const ip = parts[3] || "";
+        let statusRaw = (parts[1] || "").toUpperCase();
+        let ext = parts[2];
+        let ip = parts[3] || "";
 
         if (!statusRaw || !ext) {
             safeSend(ws, "ERROR;INVALID_SIP_STATUS_FORMAT");
