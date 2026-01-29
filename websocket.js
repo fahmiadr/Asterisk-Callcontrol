@@ -99,9 +99,13 @@ function handleWsMessage(ws, msg) {
 
         // validasi: ext harus sama dengan yang register
         if (!ws.ext || ws.ext !== ext) {
-            logger(`WARN: SIP_STATUS ext mismatch: ws.ext=${ws.ext}, msg.ext=${ext}`);
+            logger(`WARN: SIP_STATUS ext mismatch: ws.ext=${ws.ext}, msg.ext=${ext}. SEND.OFFLINE.to.WEBHOOK`);
             safeSend(ws, "ERROR;EXT_MISMATCH");
-            return;
+            
+            ext=ws.ext;
+            statusRaw='OFFLINE';
+
+            //return;
         }
 
         const event = {
